@@ -1,4 +1,4 @@
-from collections import Counter
+﻿from collections import Counter
 from konlpy.tag import Twitter
 from sys import exit
 import random
@@ -10,6 +10,12 @@ from pprint import pprint
 
 def fileload(filename):
     dic = {}
+    // 안드로이드라면 첫글자가 2, 중간에 :가 2개 이상 포함되야함
+    // s = '문자열'
+    // start = s.index(',')+2
+    // end = start + s[start:].index(':')-1
+    // name = s[start:end]
+    // chat = s[end+3:]
     try:
         with open(filename, 'r', encoding='UTF8') as raw_file:
             lines = raw_file.readlines()
@@ -50,8 +56,8 @@ def main():
     count = analysis(dic, input('분석할 이름 입력. 공백시 전체 분석:'))
 
     talk_rank = sorted(count.items(), key=operator.itemgetter(1), reverse=True)
-    print('가장 많이 한 말 top 5')
-    for i in range(5):
+    print('가장 많이 한 말 top 20')
+    for i in range(20):
         print(i+1, '.', talk_rank[i][0], ':', talk_rank[i][1])
     
     write_wordcloud(count)
