@@ -1,13 +1,12 @@
 ﻿from collections import Counter
 from konlpy.tag import Twitter
-from sys import exit
-import random
+# from sys import exit
 import operator
-import pytagcloud
+# import pytagcloud
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 
-from pprint import pprint
+# from pprint import pprint
 
 def load_windows(filename):
     dic = {}
@@ -16,11 +15,12 @@ def load_windows(filename):
             lines = raw_file.readlines()
             for l in lines:
                 if l[0] == '[': # 대화내용
-                    n = l[1:l.index(']')]
-                    t = l[l.index(']')+1:]
+                    name = l[1:l.index(']')]
+                    temp = l[l.index(']')+1:]
+                    chat = temp[temp.index(']')+2:]
                     if not n in dic.keys():
-                        dic[n] = ''
-                    dic[n] += t[t.index(']')+2:]
+                        dic[name] = ''
+                    dic[name] += chat
     except:
         print('파일 불러오기 실패')
         exit(1)
