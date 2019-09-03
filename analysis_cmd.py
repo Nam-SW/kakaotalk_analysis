@@ -5,7 +5,7 @@ import operator
 # import pytagcloud
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
-import csv
+import pandas as pd
 
 # from pprint import pprint
 
@@ -47,7 +47,17 @@ def load_android(filename):
     return dic
 
 def load_macintosh(filename):
-    return
+    dic = {}
+    try:
+        data = pd.read_csv(filename, encoding='UTF8')
+        for name, chat in zip(data['User'], data['Message']):
+            if not name in dic.keys():
+                dic[name] = ''
+            dic[name] += chat
+    except:
+        print('파일 불러오기 실패')
+        exit(1)
+    return dic
 
 def load_iphone(filename):
     dic = {}
@@ -68,7 +78,6 @@ def load_iphone(filename):
         exit(1)
     return dic
 
-
 def fileload(filename):
     dic = {}
     os = input('윈도우1, 안드로이드2, 맥3, 아이폰4: ')
@@ -76,11 +85,11 @@ def fileload(filename):
         dic = load_windows(filename)
     elif os == '2':
         dic = load_android(filename)
+    elif os == '3':
+        dic = load_macintosh(filename)
     elif os == '4':
         dic = load_iphone(filename)
     return dic
-    
-    
 
 def analysis(dic, name):
     h = Twitter()
@@ -118,6 +127,7 @@ def main():
     count = analysis(dic, input('분석할 이름 입력. 공백시 전체 분석:'))
 
     talk_rank = sorted(count.items(), key=operator.itemgetter(1), reverse=True)
+    
     print('가장 많이 한 말 top 20')
     for i in range(20):
         print(i+1, '.', talk_rank[i][0], ':', talk_rank[i][1])

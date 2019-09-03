@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QLabel, QLineEdit, QRadioButton, QFileDialog, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QLabel, QLineEdit, QRadioButton, QFileDialog, QPushButton, QMessageBox
 from analysis import analysis
 # import analysis as an
 
@@ -31,6 +31,7 @@ class MyApp(QWidget):
         # 위젯 설정
         self.input_name.setPlaceholderText('미입력시 전체 분석')
         self.setfilename.clicked.connect(self.showDialog)
+        self.submit.clicked.connect(self.start_Analysis)
 
         # 배치
         grid.addWidget(QLabel('대화 파일:'), 0, 0)
@@ -52,14 +53,20 @@ class MyApp(QWidget):
         fname = QFileDialog.getOpenFileName(self, 'Open file', './')
         if fname[0]:
             self.filename = fname[0]
-            self.filename.setText(fname[0].split('/')[-1])
+            self.Fname_Label.setText(fname[0].split('/')[-1])
     
     def start_Analysis(self):
+        if self.Fname_Label == '미선택':
+            QMessageBox.about(self, 'Error', '분석할 파일을 선택하세요.')
+            return
+
         for i in range(len(self.radio)):
             if self.radio[i].isChecked():
                 os = i+1
                 break
-        # else:
+        else:
+            QMessageBox.about(self, 'Error', '데이터셋을 추출한 os를 선택하세요.')
+            return
 
         
 

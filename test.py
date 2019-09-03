@@ -1,13 +1,11 @@
+import pandas as pd
+
 dic = {}
-with open('C:\python workspace\kakaotalk_analysis\\asset\dataset\iphone1.txt', 'r', encoding='UTF8') as raw_file:
-    lines = raw_file.readlines()
-    for l in lines:
-        if l[0] == '2' and l.count(':') >= 2: # 대화내용
-            start = l.index(',')+2
-            end = start + l[start:].index(':')-1
-            name = l[start:end]
-            chat = l[end+3:]
-            if not name in dic.keys():
-                dic[name] = ''
-            dic[name] += chat
-            print(name, chat)
+data = pd.read_csv('C:\python workspace\kakaotalk_analysis\\asset\dataset\mac1.csv', encoding='UTF8')
+for name, chat in zip(data['User'], data['Message']):
+    # print(name, chat)
+    if not name in dic.keys():
+        dic[name] = ''
+    dic[name] += ' ' + chat
+
+print(dic)
