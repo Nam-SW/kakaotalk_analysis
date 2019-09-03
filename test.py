@@ -4,18 +4,13 @@ from sys import exit
 import random
 import operator
 import pytagcloud
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 from pprint import pprint
 
-
-def fileload(filename):
+def load_windows(filename):
     dic = {}
-    // 안드로이드라면 첫글자가 2, 중간에 :가 2개 이상 포함되야함
-    // s = '문자열'
-    // start = s.index(',')+2
-    // end = start + s[start:].index(':')-1
-    // name = s[start:end]
-    // chat = s[end+3:]
     try:
         with open(filename, 'r', encoding='UTF8') as raw_file:
             lines = raw_file.readlines()
@@ -31,6 +26,43 @@ def fileload(filename):
         exit(1)
     return dic
 
+def load_android(filename):
+    dic = {}
+    try:
+        with open(filename, 'r', encoding='UTF8') as raw_file:
+            lines = raw_file.readlines()
+            for l in lines:
+                if l[0] == '2' and l.count(':') >= 2: # 대화내용
+                    start = l.index(',')+2
+                    end = start + l[start:].index(':')-1
+                    name = l[start:end]
+                    chat = l[end+3:]
+                    if not name in dic.keys():
+                        dic[name] = ''
+                    dic[name] += chat
+    except:
+        print('파일 불러오기 실패')
+        exit(1)
+    return dic
+
+def load_macintosh(filename):
+    return
+
+def load_iphone(filename):
+    return
+
+
+def fileload(filename):
+    dic = {}
+    os = input('윈도우1, 안드로이드2, 맥3, 아이폰4: ')
+    if os == '1':
+        dic = load_windows(filename)
+    elif os == '2':
+        dic = load_android(filename)
+    return dic
+    
+    
+
 def analysis(dic, name):
     h = Twitter()
     if name == '':
@@ -44,11 +76,22 @@ def analysis(dic, name):
     return count
 
 def write_wordcloud(count):
-    tag = count.most_common(50)
-    taglist = pytagcloud.make_tags(tag, maxsize=60)
+    # tag = count.most_common(50)
+    # taglist = pytagcloud.make_tags(tag, maxsize=60)
     # pprint(taglist)
-    pytagcloud.create_tag_image(taglist, 'wordcloud.jpg', size=(600, 600), fontname='korean', rectangular=False)
-    return
+    # pytagcloud.create_tag_image(taglist, 'wordcloud.jpg', size=(900, 600), fontname='korean', rectangular=False)
+    wordcloud = WordCloud(
+        width=600, 
+        height=600, 
+        font_path='C:\Windows\Fonts\맑은 고딕\malgunsl.ttf',
+        background_color='white'
+        )
+    wordcloud = wordcloud.generate_from_frequencies(count)
+    array = wordcloud.to_array()
+    fig = plt.figure(figsize=(10, 10))
+    plt.imshow(array, interpolation="bilinear")
+    plt.axis('off')
+    fig.savefig('wordcloud.png')
 
 # --------main---------
 def main():
@@ -64,6 +107,5 @@ def main():
     
 
 
-# C:\python workspace\kakaotalk_analysis\준표톡.txt
 if __name__ == '__main__':
     main()
