@@ -3,9 +3,12 @@ from konlpy.tag import Twitter
 import operator
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import pandas as pd
 
 class analysis:
     def __init__(self):
+        # self.dataset = {}
+        # self.count
         self.h = Twitter()
 
     def load_windows(self, filename):
@@ -18,12 +21,12 @@ class analysis:
                         name = l[1:l.index(']')]
                         temp = l[l.index(']')+1:]
                         chat = temp[temp.index(']')+2:]
-                        if not n in dic.keys():
+                        if not name in dic.keys():
                             dic[name] = ''
                         dic[name] += chat
         except:
             print('파일 불러오기 실패')
-            exit(1)
+            return {}
         return dic
 
     def load_android(self, filename):
@@ -40,13 +43,23 @@ class analysis:
                         if not name in dic.keys():
                             dic[name] = ''
                         dic[name] += chat
-        except:
-            print('파일 불러오기 실패')
-            exit(1)
+        except Exception as e:
+            print(e)
+            return {}
         return dic
 
     def load_macintosh(self, filename):
-        return
+        dic = {}
+        try:
+            data = pd.read_csv(filename, encoding='UTF8')
+            for name, chat in zip(data['User'], data['Message']):
+                if not name in dic.keys():
+                    dic[name] = ''
+                dic[name] += chat
+        except:
+            print('파일 불러오기 실패')
+            return {}
+        return dic
 
     def load_iphone(self, filename):
         dic = {}
@@ -64,38 +77,42 @@ class analysis:
                         dic[name] += chat
         except:
             print('파일 불러오기 실패')
-            exit(1)
+            return {}
         return dic
 
-    def fileload(self, filename):
-        dic = {}
-        os = input('윈도우1, 안드로이드2, 맥3, 아이폰4: ')
-        if os == '1':
+    def fileload(self, filename, os=1):
+        if os == 1:
             dic = self.load_windows(filename)
-        elif os == '2':
-            dic = self.load_android(filename)
-        elif os == '3':
+        elif os == 2:
             dic = self.load_macintosh(filename)
-        elif os == '4':
+        elif os == 3:
+            dic = self.load_android(filename)
+        elif os == 4:
             dic = self.load_iphone(filename)
-        return dic
+        if dic:
+            self.dataset = dic
+        else:
+            print('파일 로드 실패')
+            return False
+        return True
 
-    def analysis(self, dic, name):
+    def analysis(self, name):
         if name == '':
             s = ''
-            for key in dic.keys():
-                s += dic[key]
+            for key in self.dataset.keys():
+                s += self.dataset[key]
             nouns = self.h.nouns(s)
         else:
-            nouns = self.h.nouns(dic[name])
+            nouns = self.h.nouns(self.dataset[name])
         count = Counter(nouns)
-        return count
+        self.count = count
 
-    def write_wordcloud(count):
+    def write_wordcloud(self):
         # tag = count.most_common(50)
         # taglist = pytagcloud.make_tags(tag, maxsize=60)
         # pprint(taglist)
         # pytagcloud.create_tag_image(taglist, 'wordcloud.jpg', size=(900, 600), fontname='korean', rectangular=False)
+        count = self.count
         wordcloud = WordCloud(
             width=600, 
             height=600, 
@@ -104,7 +121,7 @@ class analysis:
         )
         wordcloud = wordcloud.generate_from_frequencies(count)
         array = wordcloud.to_array()
-        fig = plt.figure(figsize=(10, 10))
+        fig = plt.figure(figsize=(8, 8))
         plt.imshow(array, interpolation="bilinear")
         plt.axis('off')
         plt.show()

@@ -1,8 +1,6 @@
 ﻿from collections import Counter
 from konlpy.tag import Twitter
-# from sys import exit
 import operator
-# import pytagcloud
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import pandas as pd

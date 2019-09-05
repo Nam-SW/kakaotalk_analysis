@@ -1,7 +1,12 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QLabel, QLineEdit, QRadioButton, QFileDialog, QPushButton, QMessageBox
+from PyQt5.QtCore import pyqtSignal, QObject
+from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QLabel, QLineEdit, QRadioButton, QFileDialog, QPushButton, QMessageBox, QProgressBar
 from analysis import analysis
-# import analysis as an
+
+class Communicate(QObject):
+    bar_on = pyqtSignal()
+    bar_off = pyqtSignal()
+
 
 class MyApp(QWidget):
     def __init__(self):
@@ -9,6 +14,9 @@ class MyApp(QWidget):
 
         self.an = analysis()
         self.radio = []
+        self.c = Communicate()
+        self.c.bar_on.connect(self.bar_unlimit_on)
+        self.c.bar_off.connect(self.bar_unlimit_off)
 
         self.initUI()
 
@@ -24,6 +32,8 @@ class MyApp(QWidget):
         self.radio.append(QRadioButton('android', self))
         self.radio.append(QRadioButton('IOS', self))
 
+        self.pbar = QProgressBar()
+
         self.Fname_Label = QLabel('미선택')
         self.input_name = QLineEdit()
         self.submit = QPushButton('분석 시작', self)
@@ -32,6 +42,8 @@ class MyApp(QWidget):
         self.input_name.setPlaceholderText('미입력시 전체 분석')
         self.setfilename.clicked.connect(self.showDialog)
         self.submit.clicked.connect(self.start_Analysis)
+        
+        
 
         # 배치
         grid.addWidget(QLabel('대화 파일:'), 0, 0)
@@ -45,17 +57,21 @@ class MyApp(QWidget):
         grid.addWidget(self.input_name, 5, 1)
         grid.addWidget(self.submit, 5, 2)
 
+        grid.addWidget(self.pbar, 6, 0, 1, 3)
+
         self.setWindowTitle('test')
         self.setGeometry(300, 300, 300, 250)
         self.show()
 
     def showDialog(self):
+        self.pbar.setValue(0)
         fname = QFileDialog.getOpenFileName(self, 'Open file', './')
         if fname[0]:
             self.filename = fname[0]
             self.Fname_Label.setText(fname[0].split('/')[-1])
     
     def start_Analysis(self):
+        # 입력 에러 검사
         if self.Fname_Label == '미선택':
             QMessageBox.about(self, 'Error', '분석할 파일을 선택하세요.')
             return
@@ -67,6 +83,25 @@ class MyApp(QWidget):
         else:
             QMessageBox.about(self, 'Error', '데이터셋을 추출한 os를 선택하세요.')
             return
+
+        # 분석 시작
+        self.c.bar_on.emit()
+        state = self.an.fileload(self.filename, os)
+        if not state:
+            QMessageBox.about(self, 'Error', '파일 로드에 실패했습니다.')
+            return
+        
+        self.an.analysis(self.input_name.text())
+        self.c.bar_off.emit()
+        self.an.write_wordcloud()
+
+
+    def bar_unlimit_on(self):
+        self.pbar.setRange(0, 0)
+
+    def bar_unlimit_off(self):
+        self.pbar.setRange(0, 100)
+        self.pbar.setValue(100)
 
         
 
