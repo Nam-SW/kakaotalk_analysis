@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtCore import pyqtSignal, QObject
 from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QLabel, QLineEdit, QRadioButton, QFileDialog, QPushButton, QMessageBox, QProgressBar
 from analysis import analysis
+import operator
 
 class Communicate(QObject):
     bar_on = pyqtSignal()
@@ -14,6 +15,7 @@ class MyApp(QWidget):
 
         self.an = analysis()
         self.radio = []
+        self.rank = []
         self.c = Communicate()
         self.c.bar_on.connect(self.bar_unlimit_on)
         self.c.bar_off.connect(self.bar_unlimit_off)
@@ -49,6 +51,7 @@ class MyApp(QWidget):
         grid.addWidget(QLabel('대화 파일:'), 0, 0)
         grid.addWidget(QLabel('데이터\n운영체제:'), 1, 0, 4, 1)
         grid.addWidget(QLabel('분석할 이름:'), 5, 0)
+        grid.addWidget(QLabel('가장 많이 한 말 top 5'), 7, 0, 1, 3)
 
         grid.addWidget(self.Fname_Label, 0, 1)
         grid.addWidget(self.setfilename, 0, 2)
@@ -59,8 +62,12 @@ class MyApp(QWidget):
 
         grid.addWidget(self.pbar, 6, 0, 1, 3)
 
+        for i in range(5):
+            self.rank.append(QLabel(str(i+1) + '. '))
+            grid.addWidget(self.rank[i], i+8, 0, 1, 4)
+
         self.setWindowTitle('test')
-        self.setGeometry(300, 300, 300, 250)
+        # self.setGeometry(300, 300, 300, 250)
         self.show()
 
     def showDialog(self):
@@ -92,6 +99,11 @@ class MyApp(QWidget):
             return
         
         self.an.analysis(self.input_name.text())
+
+        # 가장 많이 한 말 5위 단어 및 빈도 출력
+        for i in self.an.get_rank(5):
+            self.rank[i[0]].setText(self.rank[i[0]].text()+i[1]+': '+str(i[2]))
+
         self.c.bar_off.emit()
         self.an.write_wordcloud()
 

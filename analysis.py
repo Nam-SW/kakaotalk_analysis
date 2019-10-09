@@ -1,7 +1,7 @@
 from collections import Counter
 from konlpy.tag import Twitter
-import operator
 from wordcloud import WordCloud
+import operator
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -126,3 +126,8 @@ class analysis:
         plt.axis('off')
         plt.show()
         # fig.savefig('wordcloud.png')
+
+    def get_rank(self, size):
+        rank = sorted(self.count.items(), key=operator.itemgetter(1), reverse=True)
+        for i in range(size):
+            yield (i, ) + tuple(rank[i])
