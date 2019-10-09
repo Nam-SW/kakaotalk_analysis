@@ -102,7 +102,7 @@ class MyApp(QWidget):
 
         # 가장 많이 한 말 5위 단어 및 빈도 출력
         for i in self.an.get_rank(5):
-            self.rank[i[0]].setText(self.rank[i[0]].text()+i[1]+': '+str(i[2]))
+            self.rank[i[0]].setText(self.rank[i[0]].text()[:3]+i[1]+': '+str(i[2]))
 
         self.c.bar_off.emit()
         self.an.write_wordcloud()
