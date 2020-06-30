@@ -125,3 +125,6 @@ dmypy.json
 
 .vscode
 .test.py
+
+.asset/dataset/*.txt
+.asset/dataset/*.csv
